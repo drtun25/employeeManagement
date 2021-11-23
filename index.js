@@ -210,3 +210,53 @@ inquirer
                       );
                     });
                 } 
+
+                //removing role
+                else if (answer.option === "role") {
+                    inquirer
+                      .prompt({
+                        type: "input",
+                        message:
+                          "What is the title of the role you want to remove?",
+                        name: "option"
+                      })
+                      .then(function(answer) {
+                        console.log(answer);
+                        connection.connect();
+        
+                        connection.query(
+                          "DELETE FROM role WHERE ?",
+                          { title: answer.option },
+                          function(error, results, fields) {
+                            if (error) throw error;
+                            console.log(results);
+                          }
+                        );
+                      });
+                  }
+
+                  //removing employee
+                  else if (answer.option === "employee") {
+                    inquirer
+                      .prompt({
+                        type: "input",
+                        message:"What is the id name of the employee you want to remove?",
+                        name: "option"
+                      })
+                      .then(function(answer) {
+                        console.log(answer);
+                        connection.connect();
+        
+                        connection.query(
+                          "DELETE FROM employee WHERE ?",
+                          { id: answer.option },
+                          function(error, results, fields) {
+                            if (error) throw error;
+                            console.log(results);
+                          }
+                        );
+                      });
+                  }
+                });
+            }
+          });
