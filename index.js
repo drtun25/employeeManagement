@@ -33,3 +33,26 @@ inquirer
         })
         .then(function(answer) {
             console.log(answer);
+
+            if (answer.option === "department") {
+                inquirer
+                  .prompt({
+                    type: "input",
+                    message: "What is the name of the department you want to add?",
+                    name: "option"
+                  })
+                  .then(function(answer) {
+                    console.log(answer);
+                    connection.connect();
+  
+                    connection.query(
+                      "INSERT INTO department SET ?",
+                      { name: answer.option },
+                      function(error, results, fields) {
+                        if (error) throw error;
+                        console.log(results);
+                      }
+                    );
+                  });
+              }
+  
