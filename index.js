@@ -132,11 +132,81 @@ inquirer
             });
 
             //view
-
-
-
-
-
-
-
-  
+        } else if (answer.option === "view") {
+            inquirer
+              .prompt({
+                type: "list",
+                message: "What do you want to VIEW?",
+                name: "option",
+                choices: ["department", "role", "employee"]
+              })
+              .then(function(answer) {
+                console.log(answer);
+              //   view departments
+                if (answer.option === "department") {
+                  connection.query(
+                    "SELECT * FROM department",
+                    { name: answer.option },
+                    function(error, results, fields) {
+                      if (error) throw error;
+                      console.log(results);
+                    }
+                  );
+                }
+                // view roles
+                else if (answer.option === "role") {
+                  connection.query(
+                    "SELECT * FROM role",
+                    { name: answer.option },
+                    function(error, results, fields) {
+                      if (error) throw error;
+                      console.log(results);
+                    }
+                  );
+                }
+                // view employees
+                else if (answer.option === "employee") {
+                  connection.query(
+                    "SELECT * FROM employee",
+                    { name: answer.option },
+                    function(error, results, fields) {
+                      if (error) throw error;
+                      console.log(results);
+                    }
+                  );
+                }
+      
+              });
+              // beginning of remove option
+          } else if (answer.option === "remove") {
+            inquirer
+              .prompt({
+                type: "list",
+                message: "Where do you want to remove from?",
+                name: "option",
+                choices: ["department", "role", "employee"]
+              })
+              .then(function(answer) {
+                console.log(answer);
+                // beginning of remove department
+                if (answer.option === "department") {
+                  inquirer
+                    .prompt({
+                      type: "input",
+                      message: "What is the name of the department you want to remove?",
+                      name: "option"
+                    })
+                    .then(function(answer) {
+                      console.log(answer);
+                      connection.connect();
+      
+                      connection.query(
+                        "DELETE FROM department WHERE ?",
+                        { name: answer.option },
+                        function(error, results, fields) {
+                          if (error) throw error;
+                          console.log(results);
+                        }
+                      );
+                    });
+                } 
