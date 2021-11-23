@@ -14,6 +14,7 @@ const connection = mysql.createConnection({
     database: "employee_db"
 });
 
+//the app starts
 inquirer
   .prompt({
     type: "list",
@@ -34,6 +35,7 @@ inquirer
         .then(function(answer) {
             console.log(answer);
 
+            //department
             if (answer.option === "department") {
                 inquirer
                   .prompt({
@@ -56,6 +58,7 @@ inquirer
                   });
               }
 
+              //role
               else if (answer.option === "role") {
                 inquirer
                   .prompt([{
@@ -87,5 +90,53 @@ inquirer
     
               }
 
-              
+              //employee
+              else if (answer.option === "employee") {
+                inquirer
+                  .prompt([
+                      {
+                    type: "input",
+                    message: "What is the first name of the employee you want to add?",
+                    name: "first"
+                  },
+                      {
+                    type: "input",
+                    message: "What is the last name of the employee you want to add?",
+                    name: "last"
+                  },
+                      {
+                    type: "input",
+                    message: "What role does this employee have?",
+                    name: "role"
+                  },
+                      {
+                    type: "input",
+                    message: "Who is the manager of this employee?",
+                    name: "boss"
+                  }
+                ])
+                .then(function(answer) {
+                    console.log(answer);
+                    connection.connect();
+    
+                    connection.query(
+                      "INSERT INTO employee SET ?",
+                      { first: answer.first, last: answer.last, role: answer.role, boss: answer.boss },
+                      function(error, results, fields) {
+                        if (error) throw error;
+                        console.log(results);
+                      }
+                    );
+                  });
+              }
+            });
+
+            //view
+
+
+
+
+
+
+
   
