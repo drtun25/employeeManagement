@@ -55,4 +55,37 @@ inquirer
                     );
                   });
               }
+
+              else if (answer.option === "role") {
+                inquirer
+                  .prompt([{
+                    type: "input",
+                    message: "What is the title of the role you want to add?",
+                    name: "option"
+                  },{
+                      type: "input",
+                      message: "What is the salary for this position?",
+                      name: "amount"
+                  },{
+                    type: "input",
+                    message: "What department does this role work in?",
+                    name: "departmentId"
+                  }])
+                  .then(function(answer) {
+                    console.log(answer);
+                    connection.connect();
+    
+                    connection.query(
+                      "INSERT INTO role SET ?",
+                      { title: answer.option, salary: answer.amount, department_id: answer.departmentId },
+                      function(error, results, fields) {
+                        if (error) throw error;
+                        console.log(results);
+                      }
+                    );
+                  });
+    
+              }
+
+              
   
