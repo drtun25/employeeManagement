@@ -70,3 +70,18 @@ function askQuestions() {
       }
   })
 }
+
+function viewEmployees() {
+  connection.query("SELECT * FROM employee", function (err, data) {
+      console.table(data);
+      askQuestions();
+  })
+}
+
+function viewDepartments() {
+  connection.query("SELECT * FROM department", function (err, data) {
+      console.table(data);
+      askQuestions();
+  })
+}
+
