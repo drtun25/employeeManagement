@@ -16,13 +16,14 @@ const connection = mysql.createConnection({
 
 
 //for errors
-connection.connect(function (err) {
-  if (err) throw err;
-  console.log("connected as id " + connection.threadId + "\n");
-  askQuestions();
-});
+// connection.connect(function (err) {
+//   if (err) throw err;
+//   console.log("connected as id " + connection.threadId + "\n");
+//   askQuestions();
+// });
 
 //the app starts with questions
+
 function askQuestions() {
   inquirer.prompt({
       message: "what would you like to do?",
@@ -73,14 +74,14 @@ function askQuestions() {
 
 function viewEmployees() {
   connection.query("SELECT * FROM employee", function (err, data) {
-      console.table(data);
+      cTable(data);
       askQuestions();
   })
 }
 
 function viewDepartments() {
   connection.query("SELECT * FROM department", function (err, data) {
-      console.table(data);
+      cTable(data);
       askQuestions();
   })
 }
@@ -109,7 +110,7 @@ function addEmployee() {
   ]).then(function(res) {
       connection.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [res.firstName, res.lastName, res.roleId, res.managerId], function(err, data) {
           if (err) throw err;
-          console.table("Successfully Inserted");
+          cTable("Successfully Inserted");
           askQuestions();
       })
   })
@@ -123,7 +124,7 @@ function addDepartment() {
   }, ]).then(function(res) {
       connection.query('INSERT INTO department (name) VALUES (?)', [res.department], function(err, data) {
           if (err) throw err;
-          console.table("Successfully Inserted");
+          cTable("Successfully Inserted");
           askQuestions();
       })
   })
@@ -146,9 +147,31 @@ function addRole() {
       }
   ]).then(function (response) {
       connection.query("INSERT INTO roles (title, salary, department_id) values (?, ?, ?)", [response.title, response.salary, response.department_id], function (err, data) {
-          console.table(data);
+          cTable(data);
       })
       askQuestions();
   })
 
 }
+
+function updateEmployeeRole() {
+  inquirer.prompt([
+      {
+          message: "which employee would you like to update? (use first name only for now)",
+          type: "input",
+          name: "name"
+      }, {
+          message: "enter the new role ID:",
+          type: "number",
+          name: "role_id"
+      }
+  ]).then(function (response) {
+      connection.query("UPDATE employee SET role_id = ? WHERE first_name = ?", [response.role_id, response.name], function (err, data) {
+          cTable(data);
+      })
+      askQuestions();
+  })
+
+}
+
+
