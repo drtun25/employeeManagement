@@ -1,177 +1,261 @@
-const cTable = require("console.table");
 const inquirer = require("inquirer");
-const mysql = require("mysql2");
+const mysql = require("mysql");
+const cTable = require("console.table");
 
-const connection = mysql.createConnection({
-    host: "localhost",
+var connection = mysql.createConnection({
+  host: "localhost",
 
-    port: 3333,
+  // Your port; if not 3306
+  port: 3306,
 
-    user: "root",
+  // Your username
+  user: "root",
 
-    password: "password",
-
-    database: "employee_db"
+  // Your password
+  password: "password",
+  database: "employees_db"
 });
-
-
-//for errors
-// connection.connect(function (err) {
-//   if (err) throw err;
-//   console.log("connected as id " + connection.threadId + "\n");
-//   askQuestions();
-// });
-
-//the app starts with questions
-
-function askQuestions() {
-  inquirer.prompt({
-      message: "what would you like to do?",
-      type: "list",
-      choices: [
-          "view all employees",
-          "view all departments",
-          "add employee",
-          "add department",
-          "add role",
-          "update employee role",
-          "QUIT"
-      ],
-      name: "choice"
-  }).then(answers => {
-      console.log(answers.choice);
-      switch (answers.choice) {
-          case "view all employees":
-              viewEmployees()
-              break;
-
-          case "view all departments":
-              viewDepartments()
-              break;
-
-          case "add employee":
-              addEmployee()
-              break;
-
-          case "add department":
-              addDepartment()
-              break;
-
-          case "add role":
-              addRole()
-              break;
-
-          case "update employee role":
-              updateEmployeeRole();
-              break;
-
-          default:
-              connection.end()
-              break;
-      }
+ // beginning of terminal app start
+inquirer
+  .prompt({
+    type: "list",
+    message: "What do you want to do?",
+    name: "option",
+    choices: ["add", "view", "remove"]
   })
-}
+  .then(function(answer) {
+    console.log(answer);
+    if (answer.option === "add") {
+      inquirer
+        .prompt({
+          type: "list",
+          message: "What do you want to add?",
+          name: "option",
+          choices: ["department", "role", "employee"]
+        })
+        .then(function(answer) {
+            console.log(answer);
 
-function viewEmployees() {
-  connection.query("SELECT * FROM employee", function (err, data) {
-      cTable(data);
-      askQuestions();
-  })
-}
+            // Adding department option
+             if (answer.option === "department") {
+              inquirer
+                .prompt({
+                  type: "input",
+                  message: "What is the name of the department you want to add?",
+                  name: "option"
+                })
+                .then(function(answer) {
+                  console.log(answer);
+                  connection.connect();
 
-function viewDepartments() {
-  connection.query("SELECT * FROM department", function (err, data) {
-      cTable(data);
-      askQuestions();
-  })
-}
+                  connection.query(
+                    "INSERT INTO department SET ?",
+                    { name: answer.option },
+                    function(error, results, fields) {
+                      if (error) throw error;
+                      console.log(results);
+                    }
+                  );
+                });
+            }
 
-function addEmployee() {
-  inquirer.prompt([{
-          type: "input",
-          name: "firstName",
-          message: "What is the employees first name?"
-      },
-      {
-          type: "input",
-          name: "lastName",
-          message: "What is the employees last name?"
-      },
-      {
-          type: "number",
-          name: "roleId",
-          message: "What is the employees role ID"
-      },
-      {
-          type: "number",
-          name: "managerId",
-          message: "What is the employees manager's ID?"
-      }
-  ]).then(function(res) {
-      connection.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [res.firstName, res.lastName, res.roleId, res.managerId], function(err, data) {
-          if (err) throw err;
-          cTable("Successfully Inserted");
-          askQuestions();
-      })
-  })
-}
+          // adding role option
+          else if (answer.option === "role") {
+            inquirer
+              .prompt([{
+                type: "input",
+                message: "What is the title of the role you want to add?",
+                name: "option"
+              },{
+                  type: "input",
+                  message: "What is the salary for this position?",
+                  name: "amount"
+              },{
+                type: "input",
+                message: "What department does this role work in?",
+                name: "departmentId"
+              }])
+              .then(function(answer) {
+                console.log(answer);
+                connection.connect();
 
-function addDepartment() {
-  inquirer.prompt([{
-      type: "input",
-      name: "department",
-      message: "What is the department that you want to add?"
-  }, ]).then(function(res) {
-      connection.query('INSERT INTO department (name) VALUES (?)', [res.department], function(err, data) {
-          if (err) throw err;
-          cTable("Successfully Inserted");
-          askQuestions();
-      })
-  })
-}
+                connection.query(
+                  "INSERT INTO role SET ?",
+                  { title: answer.option, salary: answer.amount, department_id: answer.departmentId },
+                  function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results);
+                  }
+                );
+              });
 
-function addRole() {
-  inquirer.prompt([
-      {
-          message: "enter title:",
-          type: "input",
-          name: "title"
-      }, {
-          message: "enter salary:",
-          type: "number",
-          name: "salary"
-      }, {
-          message: "enter department ID:",
-          type: "number",
-          name: "department_id"
-      }
-  ]).then(function (response) {
-      connection.query("INSERT INTO roles (title, salary, department_id) values (?, ?, ?)", [response.title, response.salary, response.department_id], function (err, data) {
-          cTable(data);
-      })
-      askQuestions();
-  })
+          }
 
-}
+          // Adding employee option
+          else if (answer.option === "employee") {
+            inquirer
+              .prompt([
+                  {
+                type: "input",
+                message: "What is the first name of the employee you want to add?",
+                name: "first"
+              },
+                  {
+                type: "input",
+                message: "What is the last name of the employee you want to add?",
+                name: "last"
+              },
+                  {
+                type: "input",
+                message: "What role does this employee have?",
+                name: "role"
+              },
+                  {
+                type: "input",
+                message: "Who is the manager of this employee?",
+                name: "boss"
+              }
+            ])
+              .then(function(answer) {
+                console.log(answer);
+                connection.connect();
 
-function updateEmployeeRole() {
-  inquirer.prompt([
-      {
-          message: "which employee would you like to update? (use first name only for now)",
-          type: "input",
-          name: "name"
-      }, {
-          message: "enter the new role ID:",
-          type: "number",
-          name: "role_id"
-      }
-  ]).then(function (response) {
-      connection.query("UPDATE employee SET role_id = ? WHERE first_name = ?", [response.role_id, response.name], function (err, data) {
-          cTable(data);
-      })
-      askQuestions();
-  })
+                connection.query(
+                  "INSERT INTO employee SET ?",
+                  { first: answer.first, last: answer.last, role: answer.role, boss: answer.boss },
+                  function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results);
+                  }
+                );
+              });
+          }
+        });
+        // beginning of view option
+    } else if (answer.option === "view") {
+      inquirer
+        .prompt({
+          type: "list",
+          message: "What do you want to VIEW?",
+          name: "option",
+          choices: ["department", "role", "employee"]
+        })
+        .then(function(answer) {
+          console.log(answer);
+        //   view departments
+          if (answer.option === "department") {
+            connection.query(
+              "SELECT * FROM department",
+              { name: answer.option },
+              function(error, results, fields) {
+                if (error) throw error;
+                console.log(results);
+              }
+            );
+          }
+          // view roles
+          else if (answer.option === "role") {
+            connection.query(
+              "SELECT * FROM role",
+              { name: answer.option },
+              function(error, results, fields) {
+                if (error) throw error;
+                console.log(results);
+              }
+            );
+          }
+          // view employees
+          else if (answer.option === "employee") {
+            connection.query(
+              "SELECT * FROM employee",
+              { name: answer.option },
+              function(error, results, fields) {
+                if (error) throw error;
+                console.log(results);
+              }
+            );
+          }
 
-}
+        });
+        // beginning of remove option
+    } else if (answer.option === "remove") {
+      inquirer
+        .prompt({
+          type: "list",
+          message: "Where do you want to remove from?",
+          name: "option",
+          choices: ["department", "role", "employee"]
+        })
+        .then(function(answer) {
+          console.log(answer);
+          // beginning of remove department
+          if (answer.option === "department") {
+            inquirer
+              .prompt({
+                type: "input",
+                message: "What is the name of the department you want to remove?",
+                name: "option"
+              })
+              .then(function(answer) {
+                console.log(answer);
+                connection.connect();
 
+                connection.query(
+                  "DELETE FROM department WHERE ?",
+                  { name: answer.option },
+                  function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results);
+                  }
+                );
+              });
+          }
+          // beginning of remove role
+          else if (answer.option === "role") {
+            inquirer
+              .prompt({
+                type: "input",
+                message:
+                  "What is the title of the role you want to remove?",
+                name: "option"
+              })
+              .then(function(answer) {
+                console.log(answer);
+                connection.connect();
+
+                connection.query(
+                  "DELETE FROM role WHERE ?",
+                  { title: answer.option },
+                  function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results);
+                  }
+                );
+              });
+          }
+          // beginning of remove employee
+          else if (answer.option === "employee") {
+            inquirer
+              .prompt({
+                type: "input",
+                message:"What is the id name of the employee you want to remove?",
+                name: "option"
+              })
+              .then(function(answer) {
+                console.log(answer);
+                connection.connect();
+
+                connection.query(
+                  "DELETE FROM employee WHERE ?",
+                  { id: answer.option },
+                  function(error, results, fields) {
+                    if (error) throw error;
+                    console.log(results);
+                  }
+                );
+              });
+          }
+        });
+    }
+  });
 
